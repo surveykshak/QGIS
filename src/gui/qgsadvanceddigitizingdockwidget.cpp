@@ -200,13 +200,13 @@ QgsAdvancedDigitizingDockWidget::QgsAdvancedDigitizingDockWidget( QgsMapCanvas *
   // Construction modes
   QMenu *constructionSettingsMenu = new QMenu( this );
 
-  mRecordConstructionGuides = new QAction( tr( "Record construction guides" ), constructionSettingsMenu );
+  mRecordConstructionGuides = new QAction( tr( "Record Construction Guides" ), constructionSettingsMenu );
   mRecordConstructionGuides->setCheckable( true );
   mRecordConstructionGuides->setChecked( settingsCadRecordConstructionGuides->value() );
   constructionSettingsMenu->addAction( mRecordConstructionGuides );
   connect( mRecordConstructionGuides, &QAction::triggered, this, [ = ]() { settingsCadRecordConstructionGuides->setValue( mRecordConstructionGuides->isChecked() ); } );
 
-  mShowConstructionGuides = new QAction( tr( "Show construction guides" ), constructionSettingsMenu );
+  mShowConstructionGuides = new QAction( tr( "Show Construction Guides" ), constructionSettingsMenu );
   mShowConstructionGuides->setCheckable( true );
   mShowConstructionGuides->setChecked( settingsCadShowConstructionGuides->value() );
   constructionSettingsMenu->addAction( mShowConstructionGuides );
@@ -216,7 +216,7 @@ QgsAdvancedDigitizingDockWidget::QgsAdvancedDigitizingDockWidget( QgsMapCanvas *
     updateCadPaintItem();
   } );
 
-  mSnapToConstructionGuides = new QAction( tr( "Snap to visible construction guides" ), constructionSettingsMenu );
+  mSnapToConstructionGuides = new QAction( tr( "Snap to Visible Construction Guides" ), constructionSettingsMenu );
   mSnapToConstructionGuides->setCheckable( true );
   mSnapToConstructionGuides->setChecked( settingsCadSnapToConstructionGuides->value() );
   constructionSettingsMenu->addAction( mSnapToConstructionGuides );
@@ -224,7 +224,7 @@ QgsAdvancedDigitizingDockWidget::QgsAdvancedDigitizingDockWidget( QgsMapCanvas *
 
   constructionSettingsMenu->addSeparator();
 
-  mClearConstructionGuides = new QAction( tr( "Clear construction guides" ), constructionSettingsMenu );
+  mClearConstructionGuides = new QAction( tr( "Clear Construction Guides" ), constructionSettingsMenu );
   constructionSettingsMenu->addAction( mClearConstructionGuides );
   connect( mClearConstructionGuides, &QAction::triggered, this, [ = ]()
   {
@@ -1597,7 +1597,7 @@ void QgsAdvancedDigitizingDockWidget::keyPressEvent( QKeyEvent *e )
 
       if ( mConstructionGuideLine.numPoints() >= 2 )
       {
-        mConstructionGuidesLayer->deleteFeature( mConstructionGuideId );
+        mConstructionGuidesLayer->dataProvider()->deleteFeatures( QgsFeatureIds() << mConstructionGuideId );
         mConstructionGuideLine.clear();
       }
 
@@ -1656,7 +1656,7 @@ bool QgsAdvancedDigitizingDockWidget::filterKeyPress( QKeyEvent *e )
     {
       if ( mConstructionMode && mConstructionGuideLine.numPoints() >= 2 )
       {
-        mConstructionGuidesLayer->deleteFeature( mConstructionGuideId );
+        mConstructionGuidesLayer->dataProvider()->deleteFeatures( QgsFeatureIds() << mConstructionGuideId );
         mConstructionGuideLine.clear();
 
         if ( mCadPointList.size() > 1 )
@@ -1957,7 +1957,7 @@ void QgsAdvancedDigitizingDockWidget::enable()
     resetConstructionGuides();
   }
 
-  if ( mDeferedUpdateConstructionGuidesCrs )
+  if ( mDeferredUpdateConstructionGuidesCrs )
   {
     updateConstructionGuidesCrs();
   }
@@ -2020,13 +2020,13 @@ void QgsAdvancedDigitizingDockWidget::addPoint( const QgsPointXY &point )
         QgsFeature feature;
         QgsGeometry geom( mConstructionGuideLine.clone() );
         feature.setGeometry( geom );
-        mConstructionGuidesLayer->addFeature( feature, QgsFeatureSink::FastInsert );
+        mConstructionGuidesLayer->dataProvider()->addFeature( feature );
         mConstructionGuideId = feature.id();
       }
       else if ( mConstructionGuideLine.numPoints() > 2 )
       {
         QgsGeometry geom( mConstructionGuideLine.clone() );
-        mConstructionGuidesLayer->changeGeometry( mConstructionGuideId, geom );
+        mConstructionGuidesLayer->dataProvider()->changeGeometryValues( { { mConstructionGuideId, geom } } );
       }
     }
     else
@@ -2036,7 +2036,7 @@ void QgsAdvancedDigitizingDockWidget::addPoint( const QgsPointXY &point )
         mConstructionGuideLine.addVertex( pt );
 
         QgsGeometry geom( mConstructionGuideLine.clone() );
-        mConstructionGuidesLayer->changeGeometry( mConstructionGuideId, geom );
+        mConstructionGuidesLayer->dataProvider()->changeGeometryValues( { { mConstructionGuideId, geom } } );
         mConstructionGuideLine.clear();
       }
     }
@@ -2310,21 +2310,21 @@ void QgsAdvancedDigitizingDockWidget::updateConstructionGuidesCrs()
 
   if ( !cadEnabled() )
   {
-    mDeferedUpdateConstructionGuidesCrs = true;
+    mDeferredUpdateConstructionGuidesCrs = true;
   }
 
   QgsCoordinateTransform transform = QgsCoordinateTransform( mConstructionGuidesLayer->crs(), mMapCanvas->mapSettings().destinationCrs(), QgsProject::instance()->transformContext() );
   mConstructionGuidesLayer->setCrs( mMapCanvas->mapSettings().destinationCrs() );
-  QgsFeatureIterator it = mConstructionGuidesLayer->getFeatures();
+  QgsFeatureIterator it = mConstructionGuidesLayer->getFeatures( QgsFeatureRequest().setNoAttributes() );
   QgsFeature feature;
   while ( it.nextFeature( feature ) )
   {
     QgsGeometry geom = feature.geometry();
     geom.transform( transform );
-    mConstructionGuidesLayer->changeGeometry( feature.id(), geom );
+    mConstructionGuidesLayer->dataProvider()->changeGeometryValues( { { feature.id(), geom } } );
   }
 
-  mDeferedUpdateConstructionGuidesCrs = false;
+  mDeferredUpdateConstructionGuidesCrs = false;
 }
 
 void QgsAdvancedDigitizingDockWidget::resetConstructionGuides()
@@ -2339,5 +2339,4 @@ void QgsAdvancedDigitizingDockWidget::resetConstructionGuides()
                              QStringLiteral( "constructionGuides" ),
                              QStringLiteral( "memory" ),
                              options );
-  mConstructionGuidesLayer->startEditing();
 }

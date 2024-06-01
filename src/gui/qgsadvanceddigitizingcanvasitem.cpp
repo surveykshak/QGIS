@@ -51,13 +51,9 @@ void QgsAdvancedDigitizingCanvasItem::paint( QPainter *painter )
       painter->setPen( mConstructionGuidesPen );
       while ( it.nextFeature( feature ) )
       {
-        QgsPolylineXY line = feature.geometry().asPolyline();
-        QPolygonF polygon( line.size() );
-        for ( int i = 0; i < line.size(); i++ )
-        {
-          polygon[i] = toCanvasCoordinates( line[i] );
-        }
-
+        QgsGeometry geom = feature.geometry();
+        geom.mapToPixel( *mMapCanvas->getCoordinateTransform() );
+        const QPolygonF polygon = geom.asQPolygonF();
         painter->drawPolyline( polygon );
       }
     }

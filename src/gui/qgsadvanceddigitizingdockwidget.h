@@ -313,25 +313,25 @@ class GUI_EXPORT QgsAdvancedDigitizingDockWidget : public QgsDockWidget, private
 
     /**
      * Returns the vector layer within which construction guides are stored.
-     * \since QGIS 3.38
+     * \since QGIS 3.40
      */
     QgsVectorLayer *constructionGuidesLayer() const { return mConstructionGuidesLayer.get(); }
 
     /**
      * Returns whether the construction guides are visible.
-     * \since QGIS 3.38
+     * \since QGIS 3.40
      */
     bool showConstructionGuides() const;
 
     /**
      * Returns whether points should snap to construction guides.
-     * \since QGIS 3.38
+     * \since QGIS 3.40
      */
     bool snapToConstructionGuides() const;
 
     /**
      * Returns whether construction guides are being recorded.
-     * \since QGIS 3.38
+     * \since QGIS 3.40
      */
     bool recordConstructionGuides() const;
 
@@ -1100,7 +1100,7 @@ class GUI_EXPORT QgsAdvancedDigitizingDockWidget : public QgsDockWidget, private
     std::unique_ptr<QgsVectorLayer> mConstructionGuidesLayer;
     QgsFeatureId mConstructionGuideId;
     QgsLineString mConstructionGuideLine;
-    bool mDeferedUpdateConstructionGuidesCrs = false;
+    bool mDeferredUpdateConstructionGuidesCrs = false;
 
     // Error message
     std::unique_ptr<QgsMessageBarItem> mErrorMessage;
