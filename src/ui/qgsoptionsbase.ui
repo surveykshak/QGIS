@@ -5275,6 +5275,16 @@ p, li { white-space: pre-wrap; }
        <number>0</number>
       </property>
       <item>
+       <widget class="QLabel" name="label_681">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Compiled by Sachin Kumar</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QDialogButtonBox" name="buttonBox">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
