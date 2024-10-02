@@ -43,7 +43,7 @@ void QgsHelp::openHelp( const QString &key )
 
 QUrl QgsHelp::helpUrl( const QString &key )
 {
-  QUrl helpNotFound = QUrl::fromLocalFile( QgsApplication::pkgDataPath() + "/doc/nohelp.html" );
+  QUrl helpNotFound = QUrl::fromLocalFile( QgsApplication::pkgDataPath() + "/doc/QGIS-testing-DesktopUserGuide-en.pdf" );
 
   const QgsSettings settings;
   const QStringList paths = settings.value( QStringLiteral( "help/helpSearchPath" ) ).toStringList();
